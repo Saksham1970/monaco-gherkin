@@ -1,0 +1,41 @@
+{
+  "parameterTypes": [
+    {
+      "name": "isoDate",
+      "regex": "\\d{4}-\\d{2}-\\d{2}"
+    },
+    {
+      "name": "money",
+      "regex": "\\$(\\d+\\.\\d{2})"
+    },
+    {
+      "name": "size",
+      "regex": "Small|Medium|Large"
+    }
+  ],
+  "steps": [
+    {
+      "type": "Given",
+      "expression": "the coffee shop is open"
+    },
+    {
+      "type": "When",
+      "expression": "I order a {string} on {isoDate}"
+    },
+    {
+      "type": "When",
+      "expression": "I order a {size} {string} with {string}"
+    },
+    {
+      "type": "Then",
+      "expression": "the receipt should show {money}"
+    }
+  ],
+  "stepExamples": [
+    "the coffee shop is open",
+    "I order a Large \"Latte\" with \"Milk, Sugar\"",
+    "I order a Large \"Latte\" with \"Milk, Sugar\"",
+    "the receipt should show $6.50"
+  ],
+  "defaultFeature": "Feature: Generic Coffee Shop\n\n  Scenario: Order via Editor\n    Given the coffee shop is open\n    When I order a Small \"Latte\" with \"Cocoa, Honey\"\n    Then the receipt should show $5.50"
+}

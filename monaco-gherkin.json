@@ -1,0 +1,7 @@
+{
+    "jarPath": "backend-demo/build/libs/backend-demo.jar",
+    "javaBin": "C:/Program Files/Eclipse Adoptium/jdk-17.0.17.10-hotspot/bin/java.exe",
+    "gluePackage": "com.example.coffee",
+    "featuresPath": "backend-demo/src/test/resources",
+    "defaultFeature": "Feature: Generic Coffee Shop\n\n  Scenario: Order via Editor\n    Given the coffee shop is open\n    When I order a Small \"Latte\" with \"Cocoa, Honey\"\n    Then the receipt should show $5.50"
+}
