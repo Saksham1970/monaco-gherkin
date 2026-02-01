@@ -210,6 +210,16 @@ node scripts/extract-steps.js
 cd backend-demo && ./gradlew build
 ```
 
+### Desktop App (Electron)
+
+```bash
+# Run in development mode
+npm run electron:dev
+
+# Build Windows installer
+npm run electron:build
+```
+
 ### Adding to Your Project
 
 1. **Copy configuration template**:

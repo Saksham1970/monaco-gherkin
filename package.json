@@ -2,11 +2,13 @@
   "name": "monaco-gherkin-editor",
   "version": "1.0.0",
   "description": "Production-ready Monaco Editor with Gherkin syntax support and Java Cucumber integration",
-  "main": "dist/main.js",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "webpack serve --mode development",
     "build": "webpack --mode production",
-    "extract": "node scripts/extract-steps.js"
+    "extract": "node scripts/extract-steps.js",
+    "electron:dev": "npx cross-env NODE_ENV=development electron .",
+    "electron:build": "npm run build && electron-builder"
   },
   "keywords": [
     "monaco-editor",
@@ -25,11 +27,15 @@
   "dependencies": {
     "@cucumber/monaco": "^0.0.1",
     "ansi_up": "^6.0.6",
+    "express": "^4.18.2",
     "monaco-editor": "^0.27.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^13.0.1",
+    "cross-env": "^7.0.3",
     "css-loader": "^6.11.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0",
     "html-webpack-plugin": "^5.6.5",
     "process": "^0.11.10",
     "style-loader": "^3.3.4",
@@ -39,5 +45,42 @@
     "webpack": "^5.103.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.2"
+  },
+  "build": {
+    "appId": "com.saksham.monaco-gherkin",
+    "productName": "Monaco Gherkin Editor",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "backend-demo/build/libs/*.jar",
+      "src/assets/cucumber-metadata.json",
+      "monaco-gherkin.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend-demo/build/libs",
+        "to": "backend-demo/build/libs",
+        "filter": [
+          "*.jar"
+        ]
+      },
+      {
+        "from": "src/assets",
+        "to": "assets",
+        "filter": [
+          "cucumber-metadata.json"
+        ]
+      },
+      "monaco-gherkin.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "verifyUpdateCodeSignature": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
