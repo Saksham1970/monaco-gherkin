@@ -2,15 +2,27 @@ package com.example.coffee;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class Order {
-    private String type;
-    private Size size;
-    private List<String> addons;
-    private LocalDate date;
-    private BigDecimal price;
+    private static final Map<String, BigDecimal> BASE_PRICES = Map.of(
+            "latte", new BigDecimal("4.50"),
+            "espresso", new BigDecimal("3.00"),
+            "cappuccino", new BigDecimal("4.00"),
+            "tea", new BigDecimal("2.50"));
+
+    private static final BigDecimal DEFAULT_PRICE = new BigDecimal("2.00");
+    private static final BigDecimal ADDON_PRICE = new BigDecimal("0.50");
+    private static final BigDecimal MEDIUM_UPCHARGE = new BigDecimal("0.50");
+    private static final BigDecimal LARGE_UPCHARGE = new BigDecimal("1.00");
+
+    private final String type;
+    private final Size size;
+    private final List<String> addons;
+    private final LocalDate date;
+    private final BigDecimal price;
 
     public enum Size {
         Small, Medium, Large
@@ -29,23 +41,19 @@ public class Order {
     }
 
     private BigDecimal calculatePrice() {
-        BigDecimal base = new BigDecimal("2.00");
-        if ("Latte".equalsIgnoreCase(type)) base = new BigDecimal("4.50");
-        else if ("Espresso".equalsIgnoreCase(type)) base = new BigDecimal("3.00");
-        else if ("Cappuccino".equalsIgnoreCase(type)) base = new BigDecimal("4.00");
-        else if ("Tea".equalsIgnoreCase(type)) base = new BigDecimal("2.50");
+        BigDecimal base = BASE_PRICES.getOrDefault(type.toLowerCase(), DEFAULT_PRICE);
 
-        // Size adjustment
-        if (size == Size.Large) base = base.add(new BigDecimal("1.00"));
-        if (size == Size.Medium) base = base.add(new BigDecimal("0.50"));
-        // Small is base price (or subtract, but keeping simple)
+        base = switch (size) {
+            case Large -> base.add(LARGE_UPCHARGE);
+            case Medium -> base.add(MEDIUM_UPCHARGE);
+            case Small -> base;
+        };
 
-        // Add-ons
         if (addons != null) {
-            for (String addon : addons) {
-                if ("None".equalsIgnoreCase(addon)) continue;
-                base = base.add(new BigDecimal("0.50")); // 50c per add-on
-            }
+            long addonCount = addons.stream()
+                    .filter(addon -> !"None".equalsIgnoreCase(addon))
+                    .count();
+            base = base.add(ADDON_PRICE.multiply(BigDecimal.valueOf(addonCount)));
         }
 
         return base;

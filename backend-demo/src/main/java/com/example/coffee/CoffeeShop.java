@@ -2,9 +2,10 @@ package com.example.coffee;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CoffeeShop {
-    private List<Order> orders = new ArrayList<>();
+    private final List<Order> orders = new ArrayList<>();
     private boolean isOpen = false;
 
     public void open() {
@@ -18,8 +19,7 @@ public class CoffeeShop {
         orders.add(order);
     }
 
-    public Order getLastOrder() {
-        if (orders.isEmpty()) return null;
-        return orders.get(orders.size() - 1);
+    public Optional<Order> getLastOrder() {
+        return orders.isEmpty() ? Optional.empty() : Optional.of(orders.get(orders.size() - 1));
     }
 }

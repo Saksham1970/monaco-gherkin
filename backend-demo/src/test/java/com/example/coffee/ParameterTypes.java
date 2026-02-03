@@ -3,9 +3,6 @@ package com.example.coffee;
 import io.cucumber.java.ParameterType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ParameterTypes {
 
@@ -23,6 +20,4 @@ public class ParameterTypes {
     public Order.Size size(String size) {
         return Order.Size.valueOf(size);
     }
-
-
 }

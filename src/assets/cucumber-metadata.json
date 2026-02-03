@@ -56,71 +56,68 @@
   "steps": [
     {
       "type": "Given",
-      "expression": "the coffee shop is open"
+      "expression": "the coffee shop is open",
+      "example": "the coffee shop is open"
     },
     {
       "type": "When",
-      "expression": "I order a {string} on {isoDate}"
+      "expression": "I order a {string} on {isoDate}",
+      "example": "I order a \"Latte\" on 2024-05-20"
     },
     {
       "type": "When",
-      "expression": "I order a {size} {string} with {string}"
+      "expression": "I order a {size} {string} with {string}",
+      "example": "I order a Large \"Latte\" with \"Milk, Sugar\""
     },
     {
       "type": "Then",
-      "expression": "the receipt should show {money}"
+      "expression": "the receipt should show {money}",
+      "example": "the receipt should show $6.50"
     },
     {
       "type": "Then",
-      "expression": "I wait {int} minutes"
+      "expression": "I wait {int} minutes",
+      "example": "I wait 5 minutes"
     },
     {
       "type": "Given",
-      "expression": "the temperature is {float} degrees"
+      "expression": "the temperature is {float} degrees",
+      "example": "the temperature is 98.6 degrees"
     },
     {
       "type": "Given",
-      "expression": "I use the word {word}"
+      "expression": "I use the word {word}",
+      "example": "I use the word Hello"
     },
     {
       "type": "Then",
-      "expression": "I have {byte} coins"
+      "expression": "I have {byte} coins",
+      "example": "I have 127 coins"
     },
     {
       "type": "Then",
-      "expression": "I count {short} sheep"
+      "expression": "I count {short} sheep",
+      "example": "I count 30000 sheep"
     },
     {
       "type": "Then",
-      "expression": "the universe age is {long} years"
+      "expression": "the universe age is {long} years",
+      "example": "the universe age is 13700000000 years"
     },
     {
       "type": "Then",
-      "expression": "the value is {bigdecimal}"
+      "expression": "the value is {bigdecimal}",
+      "example": "the value is 123.456789"
     },
     {
       "type": "Then",
-      "expression": "the big integer is {biginteger}"
+      "expression": "the big integer is {biginteger}",
+      "example": "the big integer is 12345678901234567890"
     },
     {
       "type": "Then",
-      "expression": "the precise value is {double}"
+      "expression": "the precise value is {double}",
+      "example": "the precise value is 3.14159265359"
     }
-  ],
-  "stepExamples": [
-    "the coffee shop is open",
-    "I order a Large \"Latte\" with \"Milk, Sugar\"",
-    "I order a Large \"Latte\" with \"Milk, Sugar\"",
-    "the receipt should show $6.50",
-    "I wait 5 minutes",
-    "the temperature is 98.6 degrees",
-    "I use the word Hello",
-    "I have 127 coins",
-    "I count 30000 sheep",
-    "the universe age is 13700000000 years",
-    "the value is 123.456789",
-    "the big integer is 12345678901234567890",
-    "the precise value is 3.14159265359"
-  ],
-  "defaultFeature": "Feature: Generic Coffee Shop\n\n  Scenario: Order via Editor\n    Given the coffee shop is open\n    When I order a Small \"Latte\" with \"Cocoa, Honey\"\n    Then the receipt should show $5.50"
+  ]
 }
