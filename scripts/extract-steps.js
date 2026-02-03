@@ -131,6 +131,7 @@ function extractSteps() {
     const stepAnnotationRegex = /io\.cucumber\.java\.en\.((?:Given|When|Then|And|But))\(\s*value=\"(.*)\"\s*\)/;
     const parameterTypeAnnotationRegex = /io\.cucumber\.java\.ParameterType\(\s*value=\"(.*)\"\s*\)/;
 
+    // Static extraction loop
     for (const className of classes) {
         try {
             const output = execSync(`"${javapCmd}" -cp "${jarPath}" -p -v ${className}`).toString();
@@ -144,6 +145,8 @@ function extractSteps() {
                     const nameMatch = block.match(/(?:[a-zA-Z0-9_$<>\[\]]+\s+)+([a-zA-Z0-9_$]+)\(/);
                     if (nameMatch) {
                         const name = nameMatch[1];
+                        // javap shows doubled backslashes (e.g. \\d). 
+                        // We un-escape once so the string is \d, then JSON.stringify makes it \\d in the file.
                         metadata.parameterTypes.push({ name, regex: regex.replace(/\\\\/g, '\\') });
                         console.log(`Found ParameterType: {${name}} -> /${regex}/`);
                     }
@@ -160,6 +163,51 @@ function extractSteps() {
         } catch (e) {
             console.warn(`Failed to process ${className}`);
         }
+    }
+
+    // Dynamic extraction of standard parameter types
+    console.log("Extracting standard parameter types...");
+    try {
+        const extractorSource = path.join(__dirname, 'ParameterExtractor.java');
+        // We use the project's JAR path for classpath
+        const classpath = jarPath;
+
+        const extractorCmd = `"${javaBin}" -cp "${classpath}" "${extractorSource}"`;
+        const extractorOutput = execSync(extractorCmd).toString();
+
+        let inSection = false;
+        const lines = extractorOutput.split(/\r?\n/);
+        for (const line of lines) {
+            if (line.includes("--- BEGIN PARAMETER TYPES ---")) {
+                inSection = true;
+                continue;
+            }
+            if (line.includes("--- END PARAMETER TYPES ---")) {
+                inSection = false;
+                continue;
+            }
+
+            if (inSection && line.includes(":")) {
+                const parts = line.split(":");
+                const name = parts[0];
+                const regex = parts.slice(1).join(":");
+
+                // Skip anonymous parameter type (empty name) as it's built-in
+                if (!name || name.trim() === '') continue;
+
+                // Avoid duplicates if we already found it via static analysis
+                if (!metadata.parameterTypes.find(pt => pt.name === name)) {
+                    // Dynamic extractor provides single backslashes in its output (e.g. \d).
+                    // We keep it as-is so JSON.stringify makes it \\d in the file.
+                    metadata.parameterTypes.push({ name, regex });
+                    console.log(`Found Standard ParameterType: {${name}} -> /${regex}/`);
+                }
+            }
+        }
+
+    } catch (e) {
+        console.error("Failed to run dynamic parameter extractor: " + e.message);
+        // Don't fail the whole process, just log error
     }
 
     // Extract real examples from feature files (1 per step definition)

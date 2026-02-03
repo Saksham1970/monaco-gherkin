@@ -25,7 +25,15 @@ async function initializeGherkin() {
 
   if (metadata.parameterTypes) {
     metadata.parameterTypes.forEach((pt: any) => {
-      ptr.defineParameterType(new ParameterType(pt.name, new RegExp(pt.regex), null, (s) => s, true, false));
+      // Check if the parameter type already exists to avoid collisions with standard types
+      try {
+        if (!ptr.lookupByTypeName(pt.name)) {
+          ptr.defineParameterType(new ParameterType(pt.name, pt.regex, null, (s) => s, true, false));
+        }
+      } catch (e) {
+        // If it fails (e.g. name already exists but lookupByTypeName failed for some reason), just log and continue
+        console.warn(`Skipping re-definition of parameter type: ${pt.name}`);
+      }
     });
   }
 

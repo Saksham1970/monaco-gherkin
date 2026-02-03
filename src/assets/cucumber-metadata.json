@@ -11,6 +11,46 @@
     {
       "name": "size",
       "regex": "Small|Medium|Large"
+    },
+    {
+      "name": "biginteger",
+      "regex": "-?\\d+|\\d+"
+    },
+    {
+      "name": "string",
+      "regex": "\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"|'([^'\\\\]*(\\\\.[^'\\\\]*)*)'"
+    },
+    {
+      "name": "bigdecimal",
+      "regex": "(?=.*\\d.*)[-+]?(?:\\d+(?:[,]?\\d+)*)*(?:[.](?=\\d.*))?\\d*(?:\\d+[E]-?\\d+)?"
+    },
+    {
+      "name": "byte",
+      "regex": "-?\\d+|\\d+"
+    },
+    {
+      "name": "double",
+      "regex": "(?=.*\\d.*)[-+]?(?:\\d+(?:[,]?\\d+)*)*(?:[.](?=\\d.*))?\\d*(?:\\d+[E]-?\\d+)?"
+    },
+    {
+      "name": "short",
+      "regex": "-?\\d+|\\d+"
+    },
+    {
+      "name": "float",
+      "regex": "(?=.*\\d.*)[-+]?(?:\\d+(?:[,]?\\d+)*)*(?:[.](?=\\d.*))?\\d*(?:\\d+[E]-?\\d+)?"
+    },
+    {
+      "name": "word",
+      "regex": "[^\\s]+"
+    },
+    {
+      "name": "int",
+      "regex": "-?\\d+|\\d+"
+    },
+    {
+      "name": "long",
+      "regex": "-?\\d+|\\d+"
     }
   ],
   "steps": [
@@ -29,13 +69,58 @@
     {
       "type": "Then",
       "expression": "the receipt should show {money}"
+    },
+    {
+      "type": "Then",
+      "expression": "I wait {int} minutes"
+    },
+    {
+      "type": "Given",
+      "expression": "the temperature is {float} degrees"
+    },
+    {
+      "type": "Given",
+      "expression": "I use the word {word}"
+    },
+    {
+      "type": "Then",
+      "expression": "I have {byte} coins"
+    },
+    {
+      "type": "Then",
+      "expression": "I count {short} sheep"
+    },
+    {
+      "type": "Then",
+      "expression": "the universe age is {long} years"
+    },
+    {
+      "type": "Then",
+      "expression": "the value is {bigdecimal}"
+    },
+    {
+      "type": "Then",
+      "expression": "the big integer is {biginteger}"
+    },
+    {
+      "type": "Then",
+      "expression": "the precise value is {double}"
     }
   ],
   "stepExamples": [
     "the coffee shop is open",
     "I order a Large \"Latte\" with \"Milk, Sugar\"",
     "I order a Large \"Latte\" with \"Milk, Sugar\"",
-    "the receipt should show $6.50"
+    "the receipt should show $6.50",
+    "I wait 5 minutes",
+    "the temperature is 98.6 degrees",
+    "I use the word Hello",
+    "I have 127 coins",
+    "I count 30000 sheep",
+    "the universe age is 13700000000 years",
+    "the value is 123.456789",
+    "the big integer is 12345678901234567890",
+    "the precise value is 3.14159265359"
   ],
   "defaultFeature": "Feature: Generic Coffee Shop\n\n  Scenario: Order via Editor\n    Given the coffee shop is open\n    When I order a Small \"Latte\" with \"Cocoa, Honey\"\n    Then the receipt should show $5.50"
 }
