@@ -1,3 +1,4 @@
+
 import { AnsiUp } from 'ansi_up';
 
 const ansiUp = new AnsiUp();

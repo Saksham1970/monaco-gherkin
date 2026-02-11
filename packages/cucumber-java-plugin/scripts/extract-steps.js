@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const CONFIG_PATH = path.join(__dirname, '../monaco-gherkin.json');
+const CONFIG_PATH = path.join(__dirname, '../../../monaco-gherkin.json');
 
 const STEP_ANNOTATION_REGEX = /io\.cucumber\.java\.en\.((?:Given|When|Then|And|But))\(\s*value=\"(.*)\"\s*\)/;
 const PARAMETER_TYPE_ANNOTATION_REGEX = /io\.cucumber\.java\.ParameterType\(\s*value=\"(.*)\"\s*\)/;
@@ -151,10 +151,10 @@ const extractStandardParameterTypes = (javaBin, jarPath, metadata) => {
 
 const extractSteps = () => {
     const config = loadConfig();
-    const jarPath = path.resolve(__dirname, '..', config.jarPath);
+    const jarPath = path.resolve(__dirname, '../../../', config.jarPath);
     const javaBin = config.javaBin || 'java';
     const gluePackage = config.gluePackage || '';
-    const featuresPath = config.featuresPath ? path.resolve(__dirname, '..', config.featuresPath) : null;
+    const featuresPath = config.featuresPath ? path.resolve(__dirname, '../../../', config.featuresPath) : null;
 
     if (!fs.existsSync(jarPath)) {
         console.error(`JAR not found: ${jarPath}`);
@@ -204,7 +204,14 @@ const extractSteps = () => {
         console.log(`Matched examples for ${examplesMap.size} of ${metadata.steps.length} steps`);
     }
 
-    const outputFile = path.join(__dirname, '../src/assets/cucumber-metadata.json');
+    const outputFile = path.join(__dirname, '../../../apps/web/src/assets/cucumber-metadata.json');
+
+    // Ensure directory exists
+    const outputDir = path.dirname(outputFile);
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+
     fs.writeFileSync(outputFile, JSON.stringify(metadata, null, 2));
     console.log(`\nWrote ${metadata.steps.length} steps and ${metadata.parameterTypes.length} parameter types to ${outputFile}`);
 };

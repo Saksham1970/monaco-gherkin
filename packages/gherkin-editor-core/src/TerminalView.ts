@@ -1,4 +1,5 @@
-import { ansiToHtml } from '../utils/AnsiConverter';
+
+import { ansiToHtml } from './AnsiConverter';
 
 const STATUS_COLORS = {
     READY: '#ccc',

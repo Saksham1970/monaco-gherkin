@@ -1,26 +1,14 @@
-export interface ExecutionResult {
-    success: boolean;
-    stdout: string;
-    stderr: string;
-}
 
-declare global {
-    interface Window {
-        electronAPI?: {
-            detectJava: () => Promise<string>;
-            runCucumber: (gherkin: string, line?: number) => Promise<ExecutionResult>;
-        };
-    }
-}
+import { ExecutionResult } from '@monaco-gherkin/core';
 
 export class CucumberRunner {
     private static isElectron(): boolean {
-        return !!window.electronAPI;
+        return !!(window as any).electronAPI;
     }
 
     static async execute(gherkin: string, line?: number): Promise<ExecutionResult> {
         if (this.isElectron()) {
-            return window.electronAPI!.runCucumber(gherkin, line);
+            return (window as any).electronAPI!.runCucumber(gherkin, line);
         }
 
         const response = await fetch('/run-cucumber', {

@@ -1,7 +1,5 @@
-export interface Scenario {
-    name: string;
-    line: number;
-}
+
+import { Scenario } from './types';
 
 const SCENARIO_PATTERN = /^\s*(?:Scenario|Example):\s*(.*)$/;
 

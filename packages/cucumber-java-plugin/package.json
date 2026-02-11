@@ -1,0 +1,16 @@
+{
+    "name": "@monaco-gherkin/cucumber-java",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "scripts": {
+        "extract": "node scripts/extract-steps.js"
+    },
+    "dependencies": {
+        "@monaco-gherkin/core": "*",
+        "cross-env": "^7.0.3"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "@types/node": "^20.0.0"
+    }
+}

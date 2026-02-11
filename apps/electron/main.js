@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { startServer } = require('./server');
-const CucumberService = require('./cucumber-service');
+const CucumberService = require('../../packages/cucumber-java-plugin/src/cucumber-service.js');
 
 const WINDOW_CONFIG = {
     width: 1400,
@@ -11,7 +11,7 @@ const WINDOW_CONFIG = {
         contextIsolation: true,
         nodeIntegration: false,
     },
-    icon: path.join(__dirname, '../assets/icon.png'),
+    icon: path.join(__dirname, '../web/src/assets/icon.png'),
     autoHideMenuBar: true,
 };
 
@@ -22,10 +22,11 @@ let serverPort;
 
 const createWindow = () => {
     mainWindow = new BrowserWindow(WINDOW_CONFIG);
-    mainWindow.loadURL(`http://localhost:${serverPort}`);
-
     if (isDevelopment()) {
+        mainWindow.loadURL('http://localhost:8080');
         mainWindow.webContents.openDevTools({ mode: 'detach' });
+    } else {
+        mainWindow.loadURL(`http://localhost:${serverPort}`);
     }
 
     mainWindow.on('closed', () => {

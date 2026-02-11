@@ -10,7 +10,7 @@ class CucumberService {
     static getConfigPath() {
         return app.isPackaged
             ? path.join(process.resourcesPath, 'monaco-gherkin.json')
-            : path.join(__dirname, '../monaco-gherkin.json');
+            : path.join(__dirname, '../../../monaco-gherkin.json');
     }
 
     static getConfiguration() {
@@ -26,7 +26,7 @@ class CucumberService {
     static getJarPath(config) {
         return app.isPackaged
             ? path.join(process.resourcesPath, config.jarPath)
-            : path.resolve(__dirname, '..', config.jarPath);
+            : path.resolve(__dirname, '../../../', config.jarPath);
     }
 
     static createTempFeatureFile(gherkin) {

@@ -1,18 +1,18 @@
 const express = require('express');
 const path = require('path');
 const { app } = require('electron');
-const CucumberService = require('./cucumber-service');
+const CucumberService = require('../../packages/cucumber-java-plugin/src/cucumber-service.js');
 
 const getMetadataPath = () =>
     app.isPackaged
         ? path.join(process.resourcesPath, 'assets', 'cucumber-metadata.json')
-        : path.join(__dirname, '../src/assets/cucumber-metadata.json');
+        : path.join(__dirname, '../web/src/assets/cucumber-metadata.json');
 
 const startServer = () =>
     new Promise((resolve) => {
         const server = express();
         server.use(express.json());
-        server.use(express.static(path.join(__dirname, '../dist')));
+        server.use(express.static(path.join(__dirname, '../web/dist')));
 
         server.get('/assets/cucumber-metadata.json', (_req, res) => {
             res.sendFile(getMetadataPath());
