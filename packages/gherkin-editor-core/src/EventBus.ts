@@ -1,5 +1,5 @@
 
-import { CucumberMetadata, ExecutionResult } from './types';
+import { ExecutionResult } from './types';
 
 export interface CoreEvents {
     'run:request': { gherkin: string; line?: number };

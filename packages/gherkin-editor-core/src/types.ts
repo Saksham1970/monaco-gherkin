@@ -23,3 +23,11 @@ export interface PluginOption {
     choices?: string[];
     description?: string;
 }
+
+export interface OptionGroup {
+    id: string;
+    label: string;
+    icon?: string;
+    options: PluginOption[];
+    onSave?: (values: Record<string, unknown>) => void | Promise<void>;
+}

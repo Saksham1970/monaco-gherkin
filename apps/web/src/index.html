@@ -5,45 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monaco Gherkin Editor</title>
+</head>
 
 <body>
     <div id="controls">
-        <button id="run-btn">Run Scenarios</button>
+        <button id="run-btn">
+            <span class="btn-icon">▶</span> Run Scenarios
+        </button>
         <div style="flex:1"></div>
+        <span id="status"></span>
         <button id="settings-toggle" title="Settings">⚙️</button>
     </div>
 
-    <div id="settings-panel">
-        <div class="form-group">
-            <label for="jarPath">Cucumber JAR Path (relative to project root)</label>
-            <input type="text" id="jarPath" placeholder="backend-demo/build/libs/backend-demo.jar"
-                value="backend-demo/build/libs/backend-demo.jar">
-        </div>
-        <div class="form-group">
-            <label for="javaBin">Java Binary Path</label>
-            <input type="text" id="javaBin" placeholder="java" value="java">
-        </div>
-        <div class="form-group">
-            <label for="gluePackage">Glue Package</label>
-            <input type="text" id="gluePackage" placeholder="com.example.steps" value="com.example.coffee">
-        </div>
-        <div class="form-group">
-            <label for="featuresPath">Features Path (Optional)</label>
-            <input type="text" id="featuresPath" placeholder="src/test/resources"
-                value="backend-demo/src/test/resources">
-        </div>
-        <div class="form-actions">
-            <button id="extract-btn" class="btn-secondary">Extract Steps & Configure</button>
-        </div>
-    </div>
+    <div id="settings-container"></div>
 
     <div id="editor-container"></div>
+    <div id="resize-handle" title="Drag to resize"></div>
     <div id="output-container">
         <div id="output-header">
             <h3>Terminals</h3>
-            <span id="status" style="font-size: 11px; color: #888; margin-left: 10px; flex: 1;"></span>
-            <button id="clear-btn"
-                style="background:none; border:none; color:#888; cursor:pointer; font-size:11px;">Clear All</button>
+            <button id="clear-btn">Clear All</button>
         </div>
         <div id="terminals-list"></div>
     </div>

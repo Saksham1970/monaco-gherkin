@@ -2,9 +2,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-// Webpack configuration for the web app
-
-const { createCucumberMiddleware } = require('../../packages/cucumber-java-plugin/src/cucumber-middleware.js');
 
 module.exports = {
     entry: './src/index.ts',
@@ -32,11 +29,7 @@ module.exports = {
     },
     resolve: {
         extensions: ['.ts', '.js'],
-        alias: {
-            // Ensure we resolve to the source of our packages for live reload editing?
-            // Or rely on ts-loader with project references. 
-            // For now, let's rely on standard node resolution via workspaces.
-        }
+        alias: {}
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -45,8 +38,6 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 { from: 'src/assets', to: 'assets', noErrorOnMissing: true },
-                // Copy monaco workers if needed? 
-                // If the original didn't, maybe it used the main thread worker (not recommended but possible).
             ],
         }),
     ],

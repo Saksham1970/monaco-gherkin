@@ -4,14 +4,16 @@ import { configure } from '@cucumber/monaco';
 import { buildStepDocuments, jsSearchIndex } from '@cucumber/suggest';
 import { ExpressionFactory, ParameterTypeRegistry, ParameterType } from '@cucumber/cucumber-expressions';
 
-import { EventBus, CoreEvents } from './EventBus';
+import { EventBus } from './EventBus';
 import { TerminalView } from './TerminalView';
+import { SettingsPanel } from './SettingsPanel';
 import { findScenarios } from './GherkinScanner';
-import { CucumberMetadata, PluginOption, ExecutionResult } from './types';
+import { CucumberMetadata, OptionGroup, ExecutionResult } from './types';
 
 export interface GherkinEditorConfig {
     container: HTMLElement;
     terminalContainer: HTMLElement;
+    settingsContainer: HTMLElement;
     statusElement?: HTMLElement;
     theme?: string;
     initialValue?: string;
@@ -19,8 +21,8 @@ export interface GherkinEditorConfig {
 
 export class GherkinEditor {
     private editor: monaco.editor.IStandaloneCodeEditor;
-    private eventBus: EventBus; // Use EventBus class directly
-    private registeredOptions: Map<string, PluginOption[]> = new Map();
+    private eventBus: EventBus;
+    private settingsPanel: SettingsPanel;
     private terminalContainer: HTMLElement;
     private statusElement?: HTMLElement;
 
@@ -38,7 +40,47 @@ export class GherkinEditor {
             'semanticHighlighting.enabled': true,
         });
 
+        this.settingsPanel = new SettingsPanel(config.settingsContainer);
 
+        // Register built-in editor options
+        this.registerEditorOptions();
+    }
+
+    private registerEditorOptions(): void {
+        const editor = this.editor;
+        this.settingsPanel.addGroup({
+            id: 'editor',
+            label: 'Editor',
+            icon: '✏️',
+            options: [
+                {
+                    key: 'theme',
+                    label: 'Theme',
+                    type: 'select',
+                    defaultValue: 'vs-dark',
+                    choices: ['vs-dark', 'vs'],
+                },
+                {
+                    key: 'fontSize',
+                    label: 'Font Size',
+                    type: 'number',
+                    defaultValue: 14,
+                },
+            ],
+            onSave: async (values) => {
+                // Apply theme globally
+                if (values.theme) {
+                    const theme = values.theme as string;
+                    monaco.editor.setTheme(theme);
+                    document.body.classList.remove('theme-vs-dark', 'theme-vs');
+                    document.body.classList.add(`theme-${theme}`);
+                }
+                // Apply font size globally
+                const size = values.fontSize as number;
+                document.documentElement.style.setProperty('--app-font-size', `${size}px`);
+                editor.updateOptions({ fontSize: size });
+            },
+        });
     }
 
     getEventBus(): EventBus {
@@ -49,12 +91,12 @@ export class GherkinEditor {
         return this.editor;
     }
 
-    registerPluginOptions(pluginId: string, options: PluginOption[]): void {
-        this.registeredOptions.set(pluginId, options);
+    getSettingsPanel(): SettingsPanel {
+        return this.settingsPanel;
     }
 
-    getPluginOptions(pluginId: string): PluginOption[] {
-        return this.registeredOptions.get(pluginId) || [];
+    registerOptionGroup(group: OptionGroup): void {
+        this.settingsPanel.addGroup(group);
     }
 
     configureGherkin(metadata: CucumberMetadata): void {
@@ -96,7 +138,6 @@ export class GherkinEditor {
             terminal.setRunning('Getting Summary...');
             if (this.statusElement) this.statusElement.innerText = 'Getting Summary...';
 
-            // Summary Run
             const summaryResult = await this.requestRun(gherkin);
             terminal.setLogs('summary', summaryResult.stdout + (summaryResult.stderr || ''));
 

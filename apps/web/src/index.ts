@@ -2,100 +2,71 @@
 import { GherkinEditor } from '@monaco-gherkin/core';
 import { JavaCucumberPlugin } from '@monaco-gherkin/cucumber-java';
 
-// Styles
 import 'monaco-editor/min/vs/editor/editor.main.css';
 import './styles.css';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const container = document.getElementById('editor-container');
-    const terminalContainer = document.getElementById('terminals-list');
-    const statusElement = document.getElementById('status');
-    const runBtn = document.getElementById('run-btn');
-    const clearBtn = document.getElementById('clear-btn');
+    const container = document.getElementById('editor-container')!;
+    const terminalContainer = document.getElementById('terminals-list')!;
+    const settingsContainer = document.getElementById('settings-container')!;
+    const statusElement = document.getElementById('status')!;
+    const runBtn = document.getElementById('run-btn')!;
+    const clearBtn = document.getElementById('clear-btn')!;
+    const settingsToggle = document.getElementById('settings-toggle')!;
+    const resizeHandle = document.getElementById('resize-handle')!;
+    const outputContainer = document.getElementById('output-container')!;
 
-    if (!container || !terminalContainer) {
-        console.error('Required DOM elements not found');
-        return;
-    }
-
-    // Load config to get default feature (if any) or start empty
+    // Load config for default feature
     let initialValue = '';
-
     try {
         const configResponse = await fetch('monaco-gherkin.json');
         if (configResponse.ok) {
             const config = await configResponse.json();
-            if (config.defaultFeature) {
-                initialValue = config.defaultFeature;
-            }
+            if (config.defaultFeature) initialValue = config.defaultFeature;
         }
-    } catch (e) {
-        // use empty string
-    }
+    } catch { /* use empty string */ }
 
     const editor = new GherkinEditor({
         container,
         terminalContainer,
-        statusElement: statusElement || undefined,
+        settingsContainer,
+        statusElement,
         initialValue,
-        theme: 'vs-dark'
+        theme: 'vs-dark',
     });
 
     const javaPlugin = new JavaCucumberPlugin(editor);
     await javaPlugin.initialize();
 
-    runBtn?.addEventListener('click', () => {
-        editor.runScenarios();
+    // --- Controls ---
+    runBtn.addEventListener('click', () => editor.runScenarios());
+    clearBtn.addEventListener('click', () => { terminalContainer.innerHTML = ''; });
+    settingsToggle.addEventListener('click', () => editor.getSettingsPanel().toggle());
+
+    // --- Terminal drag-resize ---
+    let startY = 0;
+    let startHeight = 0;
+
+    resizeHandle.addEventListener('mousedown', (e: MouseEvent) => {
+        e.preventDefault();
+        startY = e.clientY;
+        startHeight = outputContainer.offsetHeight;
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', onDragEnd);
     });
 
-    clearBtn?.addEventListener('click', () => {
-        const list = document.getElementById('terminals-list');
-        if (list) list.innerHTML = '';
-    });
+    const onDrag = (e: MouseEvent) => {
+        const delta = startY - e.clientY;
+        const newHeight = Math.max(100, Math.min(window.innerHeight - 150, startHeight + delta));
+        outputContainer.style.height = `${newHeight}px`;
+    };
 
-    // Settings Panel Logic
-    const settingsToggle = document.getElementById('settings-toggle');
-    const settingsPanel = document.getElementById('settings-panel');
-    const extractBtn = document.getElementById('extract-btn') as HTMLButtonElement;
-
-    // Inputs
-    const jarPathInput = document.getElementById('jarPath') as HTMLInputElement;
-    const javaBinInput = document.getElementById('javaBin') as HTMLInputElement;
-    const gluePackageInput = document.getElementById('gluePackage') as HTMLInputElement;
-    const featuresPathInput = document.getElementById('featuresPath') as HTMLInputElement;
-
-    settingsToggle?.addEventListener('click', () => {
-        settingsPanel?.classList.toggle('visible');
-    });
-
-    extractBtn?.addEventListener('click', async () => {
-        const originalText = extractBtn.innerText;
-        extractBtn.innerText = 'Extracting...';
-        extractBtn.disabled = true;
-
-        try {
-            const config = {
-                jarPath: jarPathInput.value,
-                javaBin: javaBinInput.value,
-                gluePackage: gluePackageInput.value,
-                featuresPath: featuresPathInput.value
-            };
-
-            await javaPlugin.extractAndConfigure(config);
-
-            if (statusElement) statusElement.innerText = 'Steps extracted & loaded successfully';
-            settingsPanel?.classList.remove('visible');
-        } catch (e) {
-            if (statusElement) statusElement.innerText = `Error: ${e instanceof Error ? e.message : String(e)}`;
-            console.error(e);
-        } finally {
-            extractBtn.innerText = originalText;
-            extractBtn.disabled = false;
-        }
-    });
-
-    // Handle resizing
-    window.addEventListener('resize', () => {
-        editor.getEditor().layout();
-    });
+    const onDragEnd = () => {
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', onDragEnd);
+    };
 });

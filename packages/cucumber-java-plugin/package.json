@@ -10,8 +10,7 @@
         "extract": "node scripts/extract-steps.js"
     },
     "dependencies": {
-        "@monaco-gherkin/core": "*",
-        "cross-env": "^7.0.3"
+        "@monaco-gherkin/core": "*"
     },
     "devDependencies": {
         "typescript": "^5.9.3",
