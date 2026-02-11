@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Controls ---
     runBtn.addEventListener('click', () => editor.runScenarios());
-    clearBtn.addEventListener('click', () => { terminalContainer.innerHTML = ''; });
+    clearBtn.addEventListener('click', () => editor.clearTerminal());
     settingsToggle.addEventListener('click', () => editor.getSettingsPanel().toggle());
 
     // --- Terminal drag-resize ---

@@ -1,6 +1,8 @@
 
 import { OptionGroup, PluginOption } from './types';
 
+const STORAGE_PREFIX = 'monaco-gherkin-settings';
+
 export class SettingsPanel {
     private readonly element: HTMLElement;
     private readonly tabBar: HTMLElement;
@@ -92,6 +94,7 @@ export class SettingsPanel {
                 try {
                     const values = this.collectValues(group);
                     await group.onSave!(values);
+                    this.saveToLocalStorage(group.id, values);
                     saveBtn.textContent = '✓ Applied';
                     setTimeout(() => {
                         saveBtn.textContent = 'Save & Apply';
@@ -110,12 +113,14 @@ export class SettingsPanel {
 
     private createInput(opt: PluginOption, groupId: string): HTMLElement {
         const id = `opt-${groupId}-${opt.key}`;
+        const savedValue = this.loadFromLocalStorage(groupId, opt.key);
+        const value = savedValue !== null ? savedValue : opt.defaultValue;
 
         if (opt.type === 'boolean') {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = id;
-            checkbox.checked = opt.defaultValue as boolean;
+            checkbox.checked = value as boolean;
             return checkbox;
         }
 
@@ -126,7 +131,7 @@ export class SettingsPanel {
                 const option = document.createElement('option');
                 option.value = choice;
                 option.textContent = choice;
-                if (choice === opt.defaultValue) option.selected = true;
+                if (choice === value) option.selected = true;
                 select.appendChild(option);
             }
             return select;
@@ -136,7 +141,7 @@ export class SettingsPanel {
             const input = document.createElement('input');
             input.type = 'number';
             input.id = id;
-            input.value = String(opt.defaultValue ?? '');
+            input.value = String(value ?? '');
             return input;
         }
 
@@ -144,7 +149,7 @@ export class SettingsPanel {
         const input = document.createElement('input');
         input.type = 'text';
         input.id = id;
-        input.value = String(opt.defaultValue ?? '');
+        input.value = String(value ?? '');
         return input;
     }
 
@@ -163,5 +168,18 @@ export class SettingsPanel {
             }
         }
         return values;
+    }
+
+    private saveToLocalStorage(groupId: string, values: Record<string, unknown>): void {
+        for (const [key, value] of Object.entries(values)) {
+            const storageKey = `${STORAGE_PREFIX}-${groupId}-${key}`;
+            localStorage.setItem(storageKey, JSON.stringify(value));
+        }
+    }
+
+    loadFromLocalStorage(groupId: string, key: string): unknown {
+        const storageKey = `${STORAGE_PREFIX}-${groupId}-${key}`;
+        const item = localStorage.getItem(storageKey);
+        return item !== null ? JSON.parse(item) : null;
     }
 }

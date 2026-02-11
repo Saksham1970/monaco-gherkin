@@ -9,20 +9,18 @@ const STATUS_COLORS = {
     ERROR: '#cd3131',
 } as const;
 
-const createTerminalHTML = (timestamp: string) => `
+const createTerminalHTML = () => `
   <div class="terminal-header">
-    <span>Batch Run - ${timestamp}</span>
+    <select class="scenario-selector">
+    </select>
     <div style="display:flex; align-items:center; gap:10px;">
-      <select class="scenario-selector">
-        <option value="summary">Run Summary</option>
-      </select>
-      <span class="terminal-status">READY</span>
+      <span class="terminal-status"></span>
     </div>
   </div>
-  <div class="terminal-body">&gt;&gt;&gt; Initializing...</div>
+  <div class="terminal-body"></div>
   <div class="summary-bar" style="display:none">
-     <span style="color:#0dbc79">Passed: <span class="pass-count">0</span></span>
-     <span style="color:#cd3131">Failed: <span class="fail-count">0</span></span>
+     <div class="summary-item"><span style="color:#0dbc79">Passed:</span> <span class="pass-count">0</span></div>
+     <div class="summary-item"><span style="color:#cd3131">Failed:</span> <span class="fail-count">0</span></div>
   </div>
 `;
 
@@ -32,12 +30,14 @@ export class TerminalView {
     private readonly selector: HTMLSelectElement;
     private readonly statusSpan: HTMLElement;
     private readonly summaryBar: HTMLElement;
-    private readonly logs: Record<string, string> = { summary: '' };
+    private logs: Record<string, string> = { all: '' };
+    private passed = 0;
+    private failed = 0;
 
     constructor(container: HTMLElement) {
         this.element = document.createElement('div');
         this.element.className = 'terminal-instance';
-        this.element.innerHTML = createTerminalHTML(new Date().toLocaleTimeString());
+        this.element.innerHTML = createTerminalHTML();
 
         this.body = this.element.querySelector('.terminal-body')!;
         this.selector = this.element.querySelector('.scenario-selector')!;
@@ -47,7 +47,16 @@ export class TerminalView {
         this.selector.addEventListener('change', () => this.updateView());
 
         container.appendChild(this.element);
-        this.element.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clear(): void {
+        this.logs = {};
+        this.selector.innerHTML = '';
+        this.body.innerHTML = '';
+        this.statusSpan.textContent = '';
+        this.summaryBar.style.display = 'none';
+        this.passed = 0;
+        this.failed = 0;
     }
 
     setRunning(message: string): void {
@@ -71,6 +80,8 @@ export class TerminalView {
     }
 
     updateSummary(passed: number, failed: number): void {
+        this.passed = passed;
+        this.failed = failed;
         this.summaryBar.style.display = 'flex';
         this.summaryBar.querySelector('.pass-count')!.textContent = passed.toString();
         this.summaryBar.querySelector('.fail-count')!.textContent = failed.toString();
@@ -87,10 +98,14 @@ export class TerminalView {
 
     private setStatus(status: keyof typeof STATUS_COLORS): void {
         this.statusSpan.textContent = status;
-        this.statusSpan.parentElement!.style.color = STATUS_COLORS[status];
+        this.statusSpan.style.color = STATUS_COLORS[status];
     }
 
     private updateView(): void {
         this.body.innerHTML = this.logs[this.selector.value] || 'No logs available.';
+    }
+
+    dispose(): void {
+        this.element.remove();
     }
 }

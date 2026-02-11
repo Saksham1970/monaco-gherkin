@@ -25,11 +25,17 @@ export class GherkinEditor {
     private settingsPanel: SettingsPanel;
     private terminalContainer: HTMLElement;
     private statusElement?: HTMLElement;
+    private terminal?: TerminalView;
 
     constructor(config: GherkinEditorConfig) {
         this.eventBus = new EventBus();
         this.terminalContainer = config.terminalContainer;
         this.statusElement = config.statusElement;
+
+        // Register language BEFORE creating editor
+        if (!monaco.languages.getLanguages().some(l => l.id === 'gherkin')) {
+            monaco.languages.register({ id: 'gherkin' });
+        }
 
         this.editor = monaco.editor.create(config.container, {
             value: config.initialValue || '',
@@ -40,10 +46,31 @@ export class GherkinEditor {
             'semanticHighlighting.enabled': true,
         });
 
+
+
         this.settingsPanel = new SettingsPanel(config.settingsContainer);
 
         // Register built-in editor options
         this.registerEditorOptions();
+
+        // Apply saved settings
+        this.applySavedSettings();
+    }
+
+    private applySavedSettings(): void {
+        const theme = this.settingsPanel.loadFromLocalStorage('editor', 'theme') as string || 'vs-dark';
+        const fontSize = this.settingsPanel.loadFromLocalStorage('editor', 'fontSize') as number || 14;
+
+        if (theme) {
+            monaco.editor.setTheme(theme);
+            document.body.classList.remove('theme-vs-dark', 'theme-vs');
+            document.body.classList.add(`theme-${theme}`);
+        }
+
+        if (fontSize) {
+            document.documentElement.style.setProperty('--app-font-size', `${fontSize}px`);
+            this.editor.updateOptions({ fontSize });
+        }
     }
 
     private registerEditorOptions(): void {
@@ -123,40 +150,67 @@ export class GherkinEditor {
 
         const stepTexts = metadata.steps.map((step) => step.example);
 
-        configure(monaco, jsSearchIndex(buildStepDocuments(stepTexts, expressions as any)), expressions as any);
+        try {
+            configure(monaco, jsSearchIndex(buildStepDocuments(stepTexts, expressions as any)), expressions as any);
+
+            // Force model recreation to trigger onDidCreateModel in @cucumber/monaco
+            const currentModel = this.editor.getModel();
+            if (currentModel) {
+                const value = currentModel.getValue();
+                const newModel = monaco.editor.createModel(value, 'gherkin');
+                this.editor.setModel(newModel);
+                currentModel.dispose();
+            }
+
+        } catch (e) {
+            console.error('Failed to configure Gherkin:', e);
+        }
+    }
+
+    clearTerminal(): void {
+        if (this.terminal) {
+            this.terminal.dispose();
+            this.terminal = undefined;
+        }
+        this.terminalContainer.innerHTML = '';
     }
 
     async runScenarios(): Promise<void> {
         const gherkin = this.editor.getValue();
         const scenarios = findScenarios(gherkin);
-        const terminal = new TerminalView(this.terminalContainer);
+
+        if (scenarios.length === 0) {
+            console.warn('No scenarios found to run.');
+            return;
+        }
+
+        // Reuse or create terminal
+        if (!this.terminal) {
+            this.terminal = new TerminalView(this.terminalContainer);
+        } else {
+            this.terminal.clear();
+        }
 
         let passed = 0;
         let failed = 0;
 
         try {
-            terminal.setRunning('Getting Summary...');
-            if (this.statusElement) this.statusElement.innerText = 'Getting Summary...';
-
-            const summaryResult = await this.requestRun(gherkin);
-            terminal.setLogs('summary', summaryResult.stdout + (summaryResult.stderr || ''));
-
             for (const scenario of scenarios) {
                 if (this.statusElement) this.statusElement.innerText = `Running: ${scenario.name}...`;
-                terminal.addScenarioOption(scenario.name);
+                this.terminal.addScenarioOption(scenario.name);
 
                 const result = await this.requestRun(gherkin, scenario.line);
-                terminal.setLogs(scenario.name, result.stdout + (result.stderr || ''));
+                this.terminal.setLogs(scenario.name, result.stdout + (result.stderr || ''));
 
                 if (result.success) passed++;
                 else failed++;
 
-                terminal.updateSummary(passed, failed);
+                this.terminal.updateSummary(passed, failed);
             }
 
-            terminal.setCompleted(failed);
+            this.terminal.setCompleted(failed);
         } catch (error) {
-            terminal.setError(error instanceof Error ? error.message : String(error));
+            this.terminal.setError(error instanceof Error ? error.message : String(error));
         } finally {
             if (this.statusElement) this.statusElement.innerText = '';
         }

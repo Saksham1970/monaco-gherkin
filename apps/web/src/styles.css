@@ -27,10 +27,15 @@ body.theme-vs {
 }
 
 body.theme-vs #controls,
-body.theme-vs #output-header,
+body.theme-vs #output-header {
+    background: #f3f3f3;
+    border-color: #d4d4d4;
+}
+
 body.theme-vs .settings-panel {
     background: #f3f3f3;
     border-color: #d4d4d4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 body.theme-vs .settings-tab {
@@ -113,7 +118,7 @@ body.theme-vs .scenario-selector {
 }
 
 .btn-icon {
-    font-size: 11px;
+    font-size: 1.1em;
 }
 
 #status {
@@ -129,7 +134,7 @@ body.theme-vs .scenario-selector {
     border: 1px solid transparent;
     color: #999;
     cursor: pointer;
-    font-size: 18px;
+    font-size: calc(var(--app-font-size) * 1.3);
     padding: 4px 6px;
     border-radius: 4px;
     transition: color 0.15s, border-color 0.15s;
@@ -220,6 +225,16 @@ body.theme-vs .scenario-selector {
     color: #ccc;
     white-space: pre-wrap;
     word-break: break-all;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.terminal-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .terminal-header {
@@ -252,6 +267,8 @@ body.theme-vs .scenario-selector {
     border-radius: 3px;
     outline: none;
     transition: border-color 0.15s;
+    max-width: 50%;
+    flex: 0 1 auto;
 }
 
 .scenario-selector:hover {
@@ -263,27 +280,57 @@ body.theme-vs .scenario-selector {
 }
 
 .summary-bar {
-    font-size: 10px;
-    padding: 4px 12px;
-    background: #1a1a1a;
-    border-top: 1px solid #222;
+    font-size: calc(var(--app-font-size) * 0.85);
+    padding: 8px 12px;
+    background: #1e1e1e;
+    border-top: 1px solid #333;
     display: flex;
-    gap: 16px;
+    gap: 12px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
     font-weight: 500;
 }
 
-/* === Settings Panel (dynamic) === */
+.pass-count,
+.fail-count {
+    font-weight: bold;
+}
+
+/* === Settings Panel (dynamic popover) === */
 .settings-panel {
+    position: absolute;
+    top: 42px;
+    right: 14px;
     background: #252526;
-    border-bottom: 1px solid #3c3c3c;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    min-width: 300px;
+    width: auto;
     max-height: 0;
+    opacity: 0;
     overflow: hidden;
-    transition: max-height 0.25s ease-out;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateY(-10px);
+    pointer-events: none;
 }
 
 .settings-panel.visible {
-    max-height: 500px;
-    transition: max-height 0.35s ease-in;
+    opacity: 1;
+    max-height: 600px;
+    /* Allow content to show */
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .settings-tabs {
@@ -392,4 +439,60 @@ body.theme-vs .scenario-selector {
     background: #3c3c3c;
     color: #666;
     cursor: not-allowed;
+}
+
+/* === Suggestion Widget Scaling === */
+.monaco-editor .suggest-widget {
+    transform-origin: top left;
+    transform: scale(calc(var(--app-font-size) / 14));
+}
+
+/* === Light Mode Badge/Icon Fixes === */
+body.theme-vs .terminal-status {
+    background: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+body.theme-vs .summary-item {
+    background: rgba(0, 0, 0, 0.08);
+    color: #333;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.theme-vs .pass-count {
+    color: #098658;
+}
+
+body.theme-vs .fail-count {
+    color: #a31515;
+}
+
+body.theme-vs #run-btn,
+body.theme-vs #settings-toggle {
+    color: #333;
+}
+
+/* Run Button Light Mode */
+body.theme-vs #run-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #cecece;
+}
+
+body.theme-vs #run-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* Gear Icon Light Mode Hover */
+body.theme-vs #settings-toggle:hover {
+    color: #000;
+    border-color: #999;
+}
+
+/* === Padding/Margin Scaling === */
+#run-btn {
+    padding: calc(var(--app-font-size) * 0.5) calc(var(--app-font-size) * 1.2);
+}
+
+#settings-toggle {
+    padding: calc(var(--app-font-size) * 0.4);
 }
