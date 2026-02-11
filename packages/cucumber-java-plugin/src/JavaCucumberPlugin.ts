@@ -47,6 +47,31 @@ export class JavaCucumberPlugin {
         }
     }
 
+    async extractAndConfigure(config: JavaPluginConfig): Promise<void> {
+        try {
+            const response = await fetch('/extract-steps', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config),
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Extraction failed');
+            }
+
+            const metadata: CucumberMetadata = await response.json();
+            this.editor.configureGherkin(metadata);
+
+            // Also update local config
+            this.config = config;
+
+        } catch (e) {
+            console.error('Extraction failed:', e);
+            throw e;
+        }
+    }
+
     dispose(): void {
         if (this.runHandler) {
             this.editor.getEventBus().off('run:request', this.runHandler);

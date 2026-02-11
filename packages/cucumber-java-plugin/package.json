@@ -2,6 +2,10 @@
     "name": "@monaco-gherkin/cucumber-java",
     "version": "1.0.0",
     "main": "src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./cucumber-service": "./src/cucumber-service.js"
+    },
     "scripts": {
         "extract": "node scripts/extract-steps.js"
     },

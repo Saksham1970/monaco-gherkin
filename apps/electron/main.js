@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { startServer } = require('./server');
-const CucumberService = require('../../packages/cucumber-java-plugin/src/cucumber-service.js');
+const CucumberService = require('@monaco-gherkin/cucumber-java/cucumber-service');
 
 const WINDOW_CONFIG = {
     width: 1400,

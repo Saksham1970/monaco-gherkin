@@ -149,16 +149,15 @@ const extractStandardParameterTypes = (javaBin, jarPath, metadata) => {
     }
 };
 
-const extractSteps = () => {
-    const config = loadConfig();
-    const jarPath = path.resolve(__dirname, '../../../', config.jarPath);
+const extractSteps = (config, rootDir) => {
+    // const config = loadConfig(); // Used to load from file, now passed as arg
+    const jarPath = path.resolve(rootDir, config.jarPath);
     const javaBin = config.javaBin || 'java';
     const gluePackage = config.gluePackage || '';
-    const featuresPath = config.featuresPath ? path.resolve(__dirname, '../../../', config.featuresPath) : null;
+    const featuresPath = config.featuresPath ? path.resolve(rootDir, config.featuresPath) : null;
 
     if (!fs.existsSync(jarPath)) {
-        console.error(`JAR not found: ${jarPath}`);
-        process.exit(1);
+        throw new Error(`JAR not found: ${jarPath}`);
     }
 
     const jdkBin = path.dirname(javaBin);
@@ -191,29 +190,46 @@ const extractSteps = () => {
 
     if (featuresPath) {
         console.log(`\nScanning feature files in ${featuresPath}...`);
-        const featureFiles = findFeatureFiles(featuresPath);
-        console.log(`Found ${featureFiles.length} feature files`);
+        if (fs.existsSync(featuresPath)) {
+            const featureFiles = findFeatureFiles(featuresPath);
+            console.log(`Found ${featureFiles.length} feature files`);
 
-        const examplesMap = extractStepExamples(featureFiles, metadata.steps, metadata.parameterTypes);
+            const examplesMap = extractStepExamples(featureFiles, metadata.steps, metadata.parameterTypes);
 
-        metadata.steps = metadata.steps.map(step => ({
-            ...step,
-            example: examplesMap.get(step.expression) || step.expression
-        }));
-
-        console.log(`Matched examples for ${examplesMap.size} of ${metadata.steps.length} steps`);
+            metadata.steps = metadata.steps.map(step => ({
+                ...step,
+                example: examplesMap.get(step.expression) || step.expression
+            }));
+            console.log(`Matched examples for ${examplesMap.size} of ${metadata.steps.length} steps`);
+        } else {
+            console.warn(`Features path not found: ${featuresPath}`);
+        }
     }
 
-    const outputFile = path.join(__dirname, '../../../apps/web/src/assets/cucumber-metadata.json');
-
-    // Ensure directory exists
-    const outputDir = path.dirname(outputFile);
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    fs.writeFileSync(outputFile, JSON.stringify(metadata, null, 2));
-    console.log(`\nWrote ${metadata.steps.length} steps and ${metadata.parameterTypes.length} parameter types to ${outputFile}`);
+    return metadata;
 };
 
-extractSteps();
+// CLI Support
+if (require.main === module) {
+    try {
+        const config = loadConfig();
+        const rootDir = path.resolve(__dirname, '../../../');
+        const metadata = extractSteps(config, rootDir);
+
+        const outputFile = path.join(rootDir, 'apps/web/src/assets/cucumber-metadata.json');
+
+        // Ensure directory exists
+        const outputDir = path.dirname(outputFile);
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        fs.writeFileSync(outputFile, JSON.stringify(metadata, null, 2));
+        console.log(`\nWrote ${metadata.steps.length} steps and ${metadata.parameterTypes.length} parameter types to ${outputFile}`);
+    } catch (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
+}
+
+module.exports = { extractSteps };

@@ -1,7 +1,8 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { app } = require('electron');
-const CucumberService = require('../../packages/cucumber-java-plugin/src/cucumber-service.js');
+const CucumberService = require('@monaco-gherkin/cucumber-java/cucumber-service');
 
 const getMetadataPath = () =>
     app.isPackaged

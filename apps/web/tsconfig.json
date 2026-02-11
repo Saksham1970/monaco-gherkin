@@ -5,7 +5,14 @@
         "rootDir": "../../"
     },
     "include": [
-        "src/**/*",
-        "../../packages/**/*"
+        "src/**/*"
+    ],
+    "references": [
+        {
+            "path": "../../packages/gherkin-editor-core"
+        },
+        {
+            "path": "../../packages/cucumber-java-plugin"
+        }
     ]
 }

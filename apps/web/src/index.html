@@ -5,218 +5,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monaco Gherkin Editor</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #1e1e1e;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            overflow: hidden;
-        }
-
-        #controls {
-            padding: 10px;
-            background: #2d2d2d;
-            border-bottom: 1px solid #444;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        #run-btn {
-            padding: 6px 16px;
-            background: #0e639c;
-            color: white;
-            border: none;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        #run-btn:hover {
-            background: #1177bb;
-        }
-
-        #run-btn:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        #editor-container {
-            flex: 1;
-            min-height: 0;
-        }
-
-        #output-container {
-            height: 300px;
-            background: #1e1e1e;
-            border-top: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #output-header {
-            padding: 8px 12px;
-            background: #252526;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
-        }
-
-        #output-header h3 {
-            margin: 0;
-            font-size: 11px;
-            color: #969696;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        #terminals-list {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column-reverse;
-            /* Newest on top */
-            gap: 1px;
-            background: #333;
-        }
-
-        .terminal-instance {
-            background: #000;
-            padding: 10px;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            font-size: 12px;
-            color: #ccc;
-            white-space: pre-wrap;
-            word-break: break-all;
-            border-bottom: 1px solid #222;
-        }
-
-        .terminal-header {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #111;
-            padding-bottom: 3px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .scenario-selector {
-            background: #1e1e1e;
-            color: #ccc;
-            border: 1px solid #333;
-            font-size: 10px;
-            padding: 1px 4px;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        .scenario-selector:hover {
-            border-color: #444;
-        }
-
-        .summary-bar {
-            font-size: 10px;
-            padding: 4px 10px;
-            background: #252526;
-            border-top: 1px solid #111;
-            display: flex;
-            gap: 15px;
-        }
-
-        /* ANSI Colors */
-        .ansi-black {
-            color: #000000;
-        }
-
-        .ansi-red {
-            color: #cd3131;
-        }
-
-        .ansi-green {
-            color: #0dbc79;
-        }
-
-        .ansi-yellow {
-            color: #e5e510;
-        }
-
-        .ansi-blue {
-            color: #2472c8;
-        }
-
-        .ansi-magenta {
-            color: #bc3fbc;
-        }
-
-        .ansi-cyan {
-            color: #11a8cd;
-        }
-
-        .ansi-white {
-            color: #e5e5e5;
-        }
-
-        .ansi-bright-black {
-            color: #666666;
-        }
-
-        .ansi-bright-red {
-            color: #f14c4c;
-        }
-
-        .ansi-bright-green {
-            color: #23d18b;
-        }
-
-        .ansi-bright-yellow {
-            color: #f5f543;
-        }
-
-        .ansi-bright-blue {
-            color: #3b8eea;
-        }
-
-        .ansi-bright-magenta {
-            color: #d670d6;
-        }
-
-        .ansi-bright-cyan {
-            color: #29b8db;
-        }
-
-        .ansi-bright-white {
-            color: #e5e5e5;
-        }
-
-        .ansi-bold {
-            font-weight: bold;
-        }
-
-        .ansi-underline {
-            text-decoration: underline;
-        }
-    </style>
-</head>
 
 <body>
     <div id="controls">
         <button id="run-btn">Run Scenarios</button>
-        <span id="status" style="font-size: 12px; color: #888;"></span>
+        <div style="flex:1"></div>
+        <button id="settings-toggle" title="Settings">⚙️</button>
     </div>
+
+    <div id="settings-panel">
+        <div class="form-group">
+            <label for="jarPath">Cucumber JAR Path (relative to project root)</label>
+            <input type="text" id="jarPath" placeholder="backend-demo/build/libs/backend-demo.jar"
+                value="backend-demo/build/libs/backend-demo.jar">
+        </div>
+        <div class="form-group">
+            <label for="javaBin">Java Binary Path</label>
+            <input type="text" id="javaBin" placeholder="java" value="java">
+        </div>
+        <div class="form-group">
+            <label for="gluePackage">Glue Package</label>
+            <input type="text" id="gluePackage" placeholder="com.example.steps" value="com.example.coffee">
+        </div>
+        <div class="form-group">
+            <label for="featuresPath">Features Path (Optional)</label>
+            <input type="text" id="featuresPath" placeholder="src/test/resources"
+                value="backend-demo/src/test/resources">
+        </div>
+        <div class="form-actions">
+            <button id="extract-btn" class="btn-secondary">Extract Steps & Configure</button>
+        </div>
+    </div>
+
     <div id="editor-container"></div>
     <div id="output-container">
         <div id="output-header">
             <h3>Terminals</h3>
+            <span id="status" style="font-size: 11px; color: #888; margin-left: 10px; flex: 1;"></span>
             <button id="clear-btn"
                 style="background:none; border:none; color:#888; cursor:pointer; font-size:11px;">Clear All</button>
         </div>
